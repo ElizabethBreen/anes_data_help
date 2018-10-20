@@ -1,0 +1,39 @@
+library(tidyverse)
+library(data.table)
+library(dplyr)
+View(rawanes)
+rawanes <- fread ("/hdir/0/elizabethb/R/anes2016")
+dim(rawanes)
+crackpots <- select (rawanes, "schoolvac" = V162146, "vacbene" = V162161,
+                     "nineEl"= V162254, "BOMus" = V162255, 
+                     "trustWash" = V161215, "trustothers" = V161219,
+                     "gun_access" = V161188, "gunlimits" = V161187)
+
+crackpots <- crackpots %>% 
+  filter( schoolvac >= 1 & vacbene >= 1 & nineEl>= 1 &
+            BOMus >= 1 & trustWash >= 1 & trustothers >= 1 & 
+            gun_access >= 1 & gunlimits>= 1)
+
+View(crackpots)
+
+maybelater<-crackpots %>% group_by(gun_access) %>% summarise(
+  vacOK =mean(schoolvac ==1),
+  vacDUNO=mean(schoolvac ==3),
+  vacBAD = mean(schoolvac ==2)
+)
+
+
+
+crackpots %>%
+  ggplot(aes(x=nineEl)) + geom_histogram()
+
+
+ggplot(crackpots, aes(x=gun_access, fill = as.factor(schoolvac))) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent)
+
+ggplot(data = crackpots) +
+  geom_bar(mapping = aes(x = gun_access, fill = as.factor(schoolvac)))
+
+ggplot(data = diamonds) +
+  geom_bar(mapping = aes(x = cut, fill = clarity))
